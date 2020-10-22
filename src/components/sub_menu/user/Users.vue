@@ -3,20 +3,24 @@
     <el-card class="users-card">
       <el-form
         ref="searchForm"
-        :model="searchForm"
+        :model="queryInfo"
         label-position="left"
         label-width="60px"
       >
         <el-form-item label="用户名">
           <el-input
-            v-model="searchForm.name"
+            v-model="queryInfo.query"
             size="small"
             placeholder="请输入需要搜索的用户"
           ></el-input>
         </el-form-item>
         <el-form-item label-width="10px">
-          <el-button size="small" type="primary">查询</el-button>
-          <el-button size="small" type="success">重置</el-button>
+          <el-button size="small" type="primary" @click="querySearch"
+            >查询</el-button
+          >
+          <el-button size="small" type="success" @click="testst"
+            >重置</el-button
+          >
         </el-form-item>
       </el-form>
       <!-- 添加用户 -->
@@ -39,11 +43,12 @@
         <el-table-column prop="email" label="邮箱"> </el-table-column>
         <el-table-column prop="role_name" label="权限角色"> </el-table-column>
         <el-table-column prop="mg_state" label="用户状态">
-          <template slot-scope="scope">
+          <template #default="{ row }">
             <el-switch
-              v-model="scope.row.mg_state"
+              v-model="row.mg_state"
               active-color="#13ce66"
               inactive-color="#ff4949"
+              @change="userStateChange(row)"
             >
             </el-switch>
           </template>
@@ -83,7 +88,7 @@
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
         :current-page="queryInfo.pagenum"
-        :page-sizes="[1, 3, 5, 7]"
+        :page-sizes="[10, 20, 30, 50]"
         :page-size="queryInfo.pagesize"
         layout="total, sizes, prev, pager, next, jumper"
         :total="total"
@@ -127,7 +132,7 @@
             <el-form-item
               label="权限角色"
               :label-width="formLabelWidth"
-              prop="password"
+              prop="role_name"
               v-else
             >
               <el-input
@@ -189,6 +194,16 @@ export default {
   // 用户列表
   name: 'users',
   data() {
+    const phone = /^1(3([0-35-9]\d|4[1-8])|4[14-9]\d|5([0125689]\d|7[1-79])|66\d|7[2-35-8]\d|8\d{2}|9[13589]\d)\d{7}$/
+    const isPhone = (rule, value, callback) => {
+      console.log(phone)
+      console.log(value)
+      if (!phone.test(value) && value) {
+        return callback(new Error('请输入正确的电话号码'))
+      } else {
+        callback()
+      }
+    }
     return {
       // 搜索Form
       searchForm: {
@@ -200,7 +215,7 @@ export default {
       queryInfo: {
         query: '',
         pagenum: 1,
-        pagesize: 3,
+        pagesize: 10,
       },
       // 用户列表总的数据条数
       total: 1,
@@ -240,6 +255,14 @@ export default {
             trigger: 'blur',
           },
         ],
+        mobile: [{ validator: isPhone, trigger: ['blur', 'change'] }],
+        email: [
+          {
+            type: 'email',
+            message: '请输入正确的邮箱地址',
+            trigger: ['blur', 'change'],
+          },
+        ],
       },
       // activeName: 'first',
       // editableTabs: [
@@ -256,20 +279,51 @@ export default {
   },
   mounted() {},
   methods: {
+    // 搜索查询
+    querySearch() {
+      console.log(this.queryInfo)
+      this.getUserList()
+    },
+    // 重置搜索
+    testst() {
+      this.queryInfo = {
+        query: '',
+        pagenum: 1,
+        pagesize: 10,
+      }
+      this.getUserList()
+    },
+    // 用户状态-开关
+    async userStateChange(row) {
+      console.log(row)
+      const { data: res } = await this.$http.updateUserState(row)
+      console.log(res)
+      if (res.meta.status !== 200) {
+        row.mg_state = !row.mg_state
+        return this.$message.error('更新用户状态失败')
+      }
+      this.$message.success('更新用户状态成功')
+    },
     // 新增-确定
     addDialogForm() {
       console.log(this.$refs)
       this.$nextTick(() => {
         console.log(this.$refs)
-        this.$refs.dialogFormRef.validate((validate) => {
+        this.$refs.dialogFormRef.validate(async (validate) => {
           console.log(validate)
           console.log(this.form)
-          if (validate) {
-            this.dialogFormVisible = false
-            this.$http.addUsers(this.form).then((res) => {
-              console.log(res)
-            })
+          if (!validate) return false
+          // if (validate) {
+          this.dialogFormVisible = false
+          const { data: res } = await this.$http.addUsers(this.form)
+          // console.log(res)
+          if (res.meta.status !== 201) {
+            return this.$message.error('添加用户失败')
+          } else {
+            this.$message.success('添加成功')
+            this.getUserList()
           }
+          // }
         })
       })
     },
