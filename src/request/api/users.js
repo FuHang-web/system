@@ -20,6 +20,19 @@ const users = {
     console.log(data);
     return axios.put(`${base.sq}/users/${data.id}/state/${data.mg_state}`);
   },
+  // 根据 ID 查询用户信息
+  getUserInfoById(id) {
+    return axios.get(`${base.sq}/users/${id}`);
+  },
+  // 根据 ID 修改用户信息
+  updateUserInfoById(data) {
+    console.log(data);
+    return axios.put(`${base.sq}/users/${data.id}`, data);
+  },
+  // 根据 ID 删除用户信息
+  removeUserInfoById(id) {
+    return axios.delete(`${base.sq}/users/${id}`);
+  },
 }
 
 export default users

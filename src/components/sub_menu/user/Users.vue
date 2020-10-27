@@ -64,7 +64,7 @@
             <el-link
               class="el-icon-delete"
               type="danger"
-              @click="deleteUser(row)"
+              @click="removeUser(row.id)"
               >删除</el-link
             >
           </template>
@@ -168,7 +168,16 @@
             size="small"
             @click="addDialogForm"
             :loading="false"
+            v-if="!this.isDisabledForm"
             >确定</el-button
+          >
+          <el-button
+            type="primary"
+            size="small"
+            @click="updateDialogForm"
+            :loading="false"
+            v-else
+            >修改</el-button
           >
           <el-button
             type="danger"
@@ -215,7 +224,7 @@ export default {
       queryInfo: {
         query: '',
         pagenum: 1,
-        pagesize: 10,
+        pagesize: 12,
       },
       // 用户列表总的数据条数
       total: 1,
@@ -327,6 +336,24 @@ export default {
         })
       })
     },
+    // 修改-提交
+    updateDialogForm() {
+      this.$nextTick(() => {
+        console.log(this.$refs)
+        this.$refs.dialogFormRef.validate(async (validate) => {
+          if (!validate) return false
+          this.dialogFormVisible = false
+          const { data: res } = await this.$http.updateUserInfoById(this.form)
+          console.log(res)
+          if (res.meta.status !== 200) {
+            return this.$message.error('修改用户数据失败')
+          } else {
+            this.$message.success('修改成功')
+            this.getUserList()
+          }
+        })
+      })
+    },
     // 取消
     cancelDialogForm() {
       this.dialogFormVisible = false
@@ -336,6 +363,7 @@ export default {
       this.$nextTick((item) => {
         console.log(this.$refs)
         this.$refs.dialogFormRef.clearValidate()
+        // this.$refs.dialogFormRef.resetFields()
         this.isDisabledForm = false
       })
       // this.$refs.dialogFormRef.resetFields()
@@ -357,17 +385,42 @@ export default {
     //   this.dialogTitle = '查看用户'
     // },
     // 修改用户数据
-    updateUser(row) {
-      this.form = row
-      console.log(row)
+    async updateUser(row) {
       this.isDisabledForm = true
-      console.log(this.dialogFormVisible)
       this.dialogFormVisible = true
       this.dialogTitle = '修改数据'
+      console.log(row)
+      const { data: res } = await this.$http.getUserInfoById(row.id)
+      console.log(res)
+      if (res.meta.status !== 200) return (this.form = row)
+      this.form = res.data
+      this.form.role_name = row.role_name
+      console.log(this.dialogFormVisible)
     },
     // 删除用户数据
-    deleteUser(row) {
-      console.log(row)
+    removeUser(id) {
+      this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      })
+        .then(async () => {
+          const { data: res } = await this.$http.removeUserInfoById(id)
+          if (res.meta.status !== 200) {
+            return this.$message.error('删除操作有误，请刷新后再试')
+          } else {
+            this.$message.success('删除用户数据成功')
+            this.getUserList()
+          }
+        })
+        .catch(() => {
+          this.$message.info('已取消删除')
+        })
+      console.log(id)
+      // const { data: res } = await this.$http.deleteUserInfoById(id)
+      // if (res.meta.status !== 200) {
+      //   return this.$message.error('删除操作有误，请刷新后再试')
+      // }
     },
     // 获取用户列表
     async getUserList() {
@@ -441,7 +494,7 @@ export default {
         padding: 10px 0;
       }
       .el-table {
-        min-height: 400px;
+        // min-height: 400px;
         .cell {
           display: flex;
           justify-content: space-around;
