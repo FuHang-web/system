@@ -64,9 +64,9 @@
         <div>
           <!-- 颜色选择 -->
           <el-color-picker
+            color-format="rgb"
             v-model="color"
             size="mini"
-            show-alpha
             @change="colorChange"
           >
           </el-color-picker>
@@ -185,7 +185,7 @@ export default {
       },
       // 是否折叠菜单
       isCollapse: false,
-      color: 'rgba(255, 69, 0, 0.68)',
+      color: 'rgb(64,158,255)',
     }
   },
   created() {
@@ -284,8 +284,28 @@ export default {
       console.log(this.$refs.goHomeRef)
     },
     // 颜色
-    colorChange(e) {
-      console.log(e)
+    colorChange(newColor) {
+      const a = newColor.replace(/\s/g, '').slice(4, -1).split(',')
+      console.log(a)
+      console.log(newColor)
+      // (0.2126*R + 0.7152*G + 0.0722*B)
+      const b = `${
+        0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[0] > 255 / 2
+          ? '#000'
+          : '#fff'
+      }`
+      console.log(b)
+      // console.log(document.body.style.getPropertyValue('--color').trim());
+      document.body.style.setProperty('--themeBgColor', newColor)
+      document.body.style.setProperty('--themeColor', b)
+      // console.log(document.body.style.getPropertyValue('--color').trim());
+      // window.less
+      //   .modifyVars({
+      //     '@bgThemeColor': e,
+      //   })
+      //   .then(() => {
+      //     console.log('成功')
+      //   })
     },
     // 当前用户下拉列表的点击事件
     handleCommand(command) {

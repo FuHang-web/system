@@ -15,12 +15,10 @@
           ></el-input>
         </el-form-item>
         <el-form-item label-width="10px">
-          <el-button size="small" type="primary" @click="querySearch"
+          <el-button size="small" @click="querySearch"
             >查询</el-button
           >
-          <el-button size="small" type="success" @click="testst"
-            >重置</el-button
-          >
+          <el-button size="small" @click="testst">重置</el-button>
         </el-form-item>
       </el-form>
       <!-- 添加用户 -->
@@ -179,11 +177,7 @@
             v-else
             >修改</el-button
           >
-          <el-button
-            type="danger"
-            size="small"
-            @click="cancelDialogForm"
-            :loading="false"
+          <el-button size="small" @click="cancelDialogForm" :loading="false"
             >取消</el-button
           >
         </el-form-item>
@@ -478,6 +472,12 @@ export default {
 </script>
 
 <style lang="less" scoped>
+button {
+  &:hover {
+    background-color: var(--themeHoverColor) !important;
+    border-color: var(--themeHoverColor) !important;
+  }
+}
 .users {
   /deep/.users-card {
     .el-card__body {
@@ -486,15 +486,35 @@ export default {
         display: flex;
         .el-form-item {
           margin-bottom: 0;
+          .el-form-item__label {
+          }
+          .el-form-item__content {
+            button {
+              &:nth-child(1) {
+                background-color: var(--themeBgColor);
+                border-color: var(--themeBgColor);
+                color: var(--themeColor);
+              }
+              &:nth-child(2) {
+              }
+            }
+          }
         }
       }
       .add-user {
         width: auto;
         box-sizing: border-box;
         padding: 10px 0;
+        > button {
+          background-color: var(--themeBgColor);
+          border-color: var(--themeBgColor);
+          color: var(--themeColor);
+        }
       }
       .el-table {
         // min-height: 400px;
+        tr {
+        }
         .cell {
           display: flex;
           justify-content: space-around;
@@ -506,10 +526,14 @@ export default {
       }
     }
   }
-  .el-dialog__wrapper {
+  /deep/.el-dialog__wrapper {
     .el-dialog {
       .el-dialog__body {
         .el-form {
+          .el-form-item {
+            .el-form-item__label {
+            }
+          }
           .form-buttons {
             display: flex;
             justify-content: flex-end;
