@@ -1,6 +1,6 @@
 <template>
   <div class="rights">
-    <el-card class="box-card">权限列表1</el-card>
+    <el-card class="box-card">权限列表</el-card>
   </div>
 </template>
 
