@@ -1,5 +1,7 @@
 <template>
-  <div class="rights">权限列表</div>
+  <div class="rights">
+    <el-card class="box-card">权限列表</el-card>
+  </div>
 </template>
 
 <script>
