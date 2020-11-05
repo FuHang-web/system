@@ -610,21 +610,6 @@ export default {
         font-size: 14px;
         margin-left: 10px;
         cursor: pointer;
-        // border-bottom: -1px;
-        //   cursor: pointer;
-        //   background-color: #fff;
-        //   border-color: #eee;
-        //   color: #ccc;
-        //   &:nth-child(1) {
-        //     padding: 0 20px;
-        //     margin-right: 3px;
-        //     background-color: #fff;
-        //     border-color: #b3d8ff;
-        //     color: #409eff;
-        //   }
-        //   &:not(:nth-child(1)) {
-        //     margin: 0 3px;
-        //   }
       }
     }
     // 右侧内容主体

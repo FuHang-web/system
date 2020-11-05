@@ -7,10 +7,19 @@ body,
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+
+    min-width: 1200px;
 }
 
 :root {
+    /* 默认 */
     --themeColor: #fff;
     --themeBgColor: rgb(64, 158, 255);
     --themeHoverColor: rgba(164, 158, 255, 0.6);
+    /* 删除 */
+    --deleteColor: #fff;
+    --deleteBgColor: #F56C6C;
+    /* 设置 */
+    --setUpColor: #fff;
+    --setUpBgColor: #E6A23C;
 }
