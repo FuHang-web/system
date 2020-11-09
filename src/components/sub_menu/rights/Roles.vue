@@ -215,7 +215,7 @@ export default {
         this.roleId,
         keysStr
       )
-      if (res.meta.status !== 201) {
+      if (res.meta.status !== 200) {
         return this.$message.error('分配权限失败')
       }
       this.$message.success('分配权限成功')
