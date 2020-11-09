@@ -105,7 +105,7 @@
         :default-checked-keys="defKeys"
       ></el-tree>
       <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="allotRights">确 定</el-button>
+        <el-button type="info" @click="allotRights">确 定</el-button>
         <el-button @click="cancelShowDialog">取 消</el-button>
       </span>
     </el-dialog>
@@ -230,15 +230,20 @@ export default {
 .roles {
   button {
     &:hover {
-      background-color: var(--themeHoverColor) !important;
-      border-color: var(--themeHoverColor) !important;
-      color: var(--themeColor);
+      background-color: var(--themeBgColor) !important;
+      border-color: var(--themeBgColor) !important;
+      color: var(--themeColor) !important;
     }
     &.el-button--primary {
       background-color: var(--themeBgColor);
       border-color: var(--themeBgColor);
       color: var(--themeColor);
       margin-bottom: 20px;
+    }
+    &.el-button--info {
+      background-color: var(--themeColor);
+      border-color: var(--themeBgColor);
+      color: var(--themeBgColor);
     }
   }
   a {

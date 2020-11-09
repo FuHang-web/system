@@ -589,8 +589,8 @@ export default {
               color: #ccc;
             }
             .is-active {
-              color: #409eff;
-              border: 1px solid #409eff;
+              color: var(--themeBgColor);
+              border: 1px solid var(--themeBgColor);
             }
           }
         }
