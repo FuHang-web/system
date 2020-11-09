@@ -1,7 +1,7 @@
 <template>
   <div class="roles">
     <el-card class="box-card">
-      <el-button size="small">添加角色</el-button>
+      <el-button type="primary" size="small">添加角色</el-button>
       <el-table :data="rolesList" border>
         <!-- 展开列 -->
         <el-table-column type="expand">
@@ -105,8 +105,8 @@
         :default-checked-keys="defKeys"
       ></el-tree>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="cancelShowDialog">取 消</el-button>
         <el-button type="primary" @click="allotRights">确 定</el-button>
+        <el-button @click="cancelShowDialog">取 消</el-button>
       </span>
     </el-dialog>
   </div>
@@ -229,7 +229,12 @@ export default {
 <style lang="less" scoped>
 .roles {
   button {
-    &.el-button--default {
+    &:hover {
+      background-color: var(--themeHoverColor) !important;
+      border-color: var(--themeHoverColor) !important;
+      color: var(--themeColor);
+    }
+    &.el-button--primary {
       background-color: var(--themeBgColor);
       border-color: var(--themeBgColor);
       color: var(--themeColor);
