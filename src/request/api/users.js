@@ -33,6 +33,16 @@ const users = {
   removeUserInfoById(id) {
     return axios.delete(`${base.sq}/users/${id}`);
   },
+  // 获取角色列表数据
+  getRolesListData() {
+    return axios.get(`${base.sq}/roles`);
+  },
+  // 分配用户角色
+  allotUserRoles(userId, rolesId) {
+    return axios.put(`${base.sq}/users/${userId}/role`, {
+      rid: rolesId
+    });
+  }
 }
 
 export default users

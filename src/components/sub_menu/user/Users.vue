@@ -15,9 +15,7 @@
           ></el-input>
         </el-form-item>
         <el-form-item label-width="10px">
-          <el-button size="small" @click="querySearch"
-            >查询</el-button
-          >
+          <el-button size="small" @click="querySearch">查询</el-button>
           <el-button size="small" @click="testst">重置</el-button>
         </el-form-item>
       </el-form>
@@ -51,7 +49,7 @@
             </el-switch>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="130" align="center">
+        <el-table-column label="操作" width="180" align="center">
           <template v-slot:default="{ row }">
             <el-link
               class="el-icon-edit"
@@ -64,6 +62,9 @@
               type="danger"
               @click="removeUser(row.id)"
               >删除</el-link
+            >
+            <el-link class="el-icon-plus" type="warning" @click="setRoles(row)"
+              >设置</el-link
             >
           </template>
           <!-- <template slot-scope="scope">
@@ -183,6 +184,40 @@
         </el-form-item>
       </el-form>
     </el-dialog>
+    <el-dialog
+      ref="allotRolesRef"
+      title="分配角色"
+      @close="closeAllotRolesDialog"
+      :visible.sync="allotRolesDialog"
+      class="allotRolesStyle"
+    >
+      <p>当前用户 : {{ userInfo.username }}</p>
+      <p>当前角色 : {{ userInfo.role_name }}</p>
+      <p>
+        分配角色 :
+        <el-select
+          v-model="roleId"
+          placeholder="请选择"
+          size="small"
+          @change="allotRoles"
+        >
+          <el-option
+            v-for="item in rolsesList"
+            :key="item.id"
+            :label="item.roleName"
+            :value="item.id"
+            :disabled="item.roleName === userInfo.role_name"
+          >
+          </el-option>
+        </el-select>
+      </p>
+      <div style="text-align: right">
+        <el-button size="small" @click="clickAllotRoles" v-if="roleId"
+          >分配角色</el-button
+        >
+        <el-button size="small" @click="closeAllotRoles">关闭</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -208,12 +243,17 @@ export default {
       }
     }
     return {
+      roleId: '',
+      // 所有角色的角色列表
+      rolsesList: [],
       // 搜索Form
       searchForm: {
         name: '',
       },
       // 用户列表
       userList: [],
+      // 当前用户信息
+      userInfo: {},
       // 分页
       queryInfo: {
         query: '',
@@ -232,6 +272,8 @@ export default {
       },
       // 添加用户表单弹窗显示隐藏
       dialogFormVisible: false,
+      // 设置用户角色弹窗的显示隐藏
+      allotRolesDialog: false,
       // 用户弹窗title
       dialogTitle: '',
       // 用户弹窗label的宽度
@@ -267,14 +309,6 @@ export default {
           },
         ],
       },
-      // activeName: 'first',
-      // editableTabs: [
-      //   // {
-      //   //   title: '添加',
-      //   //   name: 'second',
-      //   //   content: 'Tab 1 content',
-      //   // },
-      // ],
     }
   },
   created() {
@@ -282,6 +316,28 @@ export default {
   },
   mounted() {},
   methods: {
+    // 设置角色选中
+    allotRoles() {
+      console.log(this.roleId)
+    },
+    // 设置角色，确定按钮
+    async clickAllotRoles() {
+      console.log(this.roleId)
+      console.log(this.userInfo)
+      const { data: res } = await this.$http.allotUserRoles(
+        this.userInfo.id,
+        this.roleId
+      )
+      if (res.meta.status !== 200) {
+        return this.$message.error('设置角色失败')
+      }
+      this.$message.success('成功设置用户角色')
+      this.allotRolesDialog = false
+      this.getUserList()
+    },
+    closeAllotRoles() {
+      this.allotRolesDialog = false
+    },
     // 搜索查询
     querySearch() {
       console.log(this.queryInfo)
@@ -337,6 +393,7 @@ export default {
         this.$refs.dialogFormRef.validate(async (validate) => {
           if (!validate) return false
           this.dialogFormVisible = false
+          console.log(this.form)
           const { data: res } = await this.$http.updateUserInfoById(this.form)
           console.log(res)
           if (res.meta.status !== 200) {
@@ -352,15 +409,21 @@ export default {
     cancelDialogForm() {
       this.dialogFormVisible = false
     },
-    // 关闭dialog弹窗的回调
+    // 关闭用户信息dialog弹窗的回调
     closeDialog() {
-      this.$nextTick((item) => {
+      this.$nextTick(() => {
         console.log(this.$refs)
         this.$refs.dialogFormRef.clearValidate()
+        console.log(this.$refs.allotRolesRef)
         // this.$refs.dialogFormRef.resetFields()
         this.isDisabledForm = false
       })
-      // this.$refs.dialogFormRef.resetFields()
+    },
+    // 关闭分配角色的dialog弹窗
+    closeAllotRolesDialog() {
+      this.$nextTick(() => {
+        this.roleId = ''
+      })
     },
     // 添加用户-打开弹窗
     addUser() {
@@ -369,15 +432,6 @@ export default {
       this.dialogFormVisible = true
       this.dialogTitle = '添加用户'
     },
-    // // 查看用户数据
-    // viewUser(row) {
-    //   console.log(row);
-    //   this.form = row
-    //   console.log(this.dialogFormVisible)
-    //   this.dialogFormVisible = true
-    //   this.isDisabledForm = false
-    //   this.dialogTitle = '查看用户'
-    // },
     // 修改用户数据
     async updateUser(row) {
       this.isDisabledForm = true
@@ -416,6 +470,13 @@ export default {
       //   return this.$message.error('删除操作有误，请刷新后再试')
       // }
     },
+    // 设置用户角色
+    setRoles(row) {
+      this.getRolesList()
+      this.userInfo = row
+      console.log(row)
+      this.allotRolesDialog = true
+    },
     // 获取用户列表
     async getUserList() {
       const { data: res } = await this.$http.getUsers(this.queryInfo)
@@ -424,6 +485,15 @@ export default {
       this.total = res.data.total
       this.userList = res.data.users
       this.$message.success(res.meta.msg)
+    },
+    // 获取角色列表
+    async getRolesList() {
+      const { data: res } = await this.$http.getRolesListData()
+      if (res.meta.status !== 200) {
+        return this.$message.error('获取角色列表失败')
+      }
+      this.rolsesList = res.data
+      console.log(res)
     },
     // 分页
     handleSizeChange(newSize) {
@@ -436,37 +506,6 @@ export default {
       this.getUserList()
       console.log(`当前页: ${newPage}`)
     },
-    // handleClick(tab, event) {
-    //   console.log(tab, event)
-    // },
-    // addcon(val) {
-    //   console.log(val)
-    //   if (val) {
-    //     this.editableTabs.push({
-    //       title: '添加',
-    //       name: 'second',
-    //     })
-    //     this.activeName = 'second'
-    //   }
-    // },
-    // removeTab(targetName) {
-    //   console.log(targetName)
-    //   const tabs = this.editableTabs
-    //   let activeName = this.activeName
-    //   if (activeName === targetName) {
-    //     tabs.forEach((tab, index) => {
-    //       if (tab.name === targetName) {
-    //         const nextTab = tabs[index + 1] || tabs[index - 1]
-    //         if (nextTab) {
-    //           activeName = nextTab.name
-    //         }
-    //       }
-    //     })
-    //   }
-    //   this.activeName = 'first'
-    //   // this.activeName = activeName
-    //   this.editableTabs = tabs.filter((tab) => tab.name !== targetName)
-    // },
   },
 }
 </script>
@@ -541,6 +580,11 @@ button {
           }
         }
       }
+    }
+  }
+  /deep/.allotRolesStyle {
+    .el-dialog {
+      width: 35%;
     }
   }
 }
