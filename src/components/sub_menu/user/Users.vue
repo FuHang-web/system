@@ -15,7 +15,9 @@
           ></el-input>
         </el-form-item>
         <el-form-item label-width="10px">
-          <el-button size="small" @click="querySearch">查询</el-button>
+          <el-button size="small" type="info" @click="querySearch"
+            >查询</el-button
+          >
           <el-button size="small" @click="testst">重置</el-button>
         </el-form-item>
       </el-form>
@@ -163,7 +165,7 @@
         ></el-row>
         <el-form-item class="form-buttons">
           <el-button
-            type="primary"
+            type="info"
             size="small"
             @click="addDialogForm"
             :loading="false"
@@ -171,7 +173,7 @@
             >确定</el-button
           >
           <el-button
-            type="primary"
+            type="info"
             size="small"
             @click="updateDialogForm"
             :loading="false"
@@ -212,7 +214,11 @@
         </el-select>
       </p>
       <div style="text-align: right">
-        <el-button size="small" @click="clickAllotRoles" v-if="roleId"
+        <el-button
+          type="info"
+          size="small"
+          @click="clickAllotRoles"
+          v-if="roleId"
           >分配角色</el-button
         >
         <el-button size="small" @click="closeAllotRoles">关闭</el-button>
@@ -341,6 +347,9 @@ export default {
     // 搜索查询
     querySearch() {
       console.log(this.queryInfo)
+      if (!this.queryInfo.query) {
+        return this.$message.error('请输入需要查询的用户字段')
+      }
       this.getUserList()
     },
     // 重置搜索
@@ -511,13 +520,45 @@ export default {
 </script>
 
 <style lang="less" scoped>
-button {
-  &:hover {
-    background-color: var(--themeHoverColor) !important;
-    border-color: var(--themeHoverColor) !important;
-  }
-}
 .users {
+  button {
+    &:hover {
+      background-color: var(--themeBgColor) !important;
+      border-color: var(--themeBgColor) !important;
+      color: var(--themeColor) !important;
+    }
+    &.el-button--primary {
+      background-color: var(--themeBgColor);
+      border-color: var(--themeBgColor);
+      color: var(--themeColor);
+    }
+    &.el-button--info {
+      background-color: var(--themeColor);
+      border-color: var(--themeBgColor);
+      color: var(--themeBgColor);
+    }
+  }
+  a {
+    // background-color: var(--themeBgColor);
+    // border-color: var(--themeBgColor);
+    color: var(--themeBgColor);
+    // &:hover {
+    //   background-color: var(--themeHoverColor) !important;
+    //   // border-color: var(--themeHoverColor) !important;
+    // }
+    // 删除
+    &.el-link--danger {
+      // background-color: var(--deleteBgColor);
+      // border-color: var(--deleteBgColor);
+      color: var(--deleteBgColor);
+    }
+    // 设置
+    &.el-link--warning {
+      // background-color: var(--setUpBgColor);
+      // border-color: var(--setUpBgColor);
+      color: var(--setUpBgColor);
+    }
+  }
   /deep/.users-card {
     .el-card__body {
       padding: 10px 20px;
