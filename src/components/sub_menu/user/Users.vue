@@ -101,13 +101,14 @@
       :visible.sync="dialogFormVisible"
       @close="closeDialog"
     >
-      <el-form :model="form" :rules="dialogFormRules" ref="dialogFormRef">
+      <el-form :model="form" ref="dialogFormRef">
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item
               label="用户名称"
               :label-width="formLabelWidth"
               prop="username"
+              :rules="formRules.required"
             >
               <el-input
                 :disabled="this.isDisabledForm"
@@ -121,6 +122,7 @@
               :label-width="formLabelWidth"
               prop="password"
               v-if="!this.isDisabledForm"
+              :rules="formRules.required"
             >
               <el-input
                 type="password"
@@ -150,6 +152,7 @@
               label="邮箱"
               :label-width="formLabelWidth"
               prop="email"
+              :rules="formRules.email"
             >
               <el-input v-model="form.email" autocomplete="off"></el-input>
             </el-form-item>
@@ -159,6 +162,7 @@
               label="手机号"
               :label-width="formLabelWidth"
               prop="mobile"
+              :rules="formRules.phone"
             >
               <el-input v-model="form.mobile" autocomplete="off"></el-input>
             </el-form-item> </el-col
@@ -238,17 +242,8 @@ export default {
   // 用户列表
   name: 'users',
   data() {
-    const phone = /^1(3([0-35-9]\d|4[1-8])|4[14-9]\d|5([0125689]\d|7[1-79])|66\d|7[2-35-8]\d|8\d{2}|9[13589]\d)\d{7}$/
-    const isPhone = (rule, value, callback) => {
-      console.log(phone)
-      console.log(value)
-      if (!phone.test(value) && value) {
-        return callback(new Error('请输入正确的电话号码'))
-      } else {
-        callback()
-      }
-    }
     return {
+      formRules: this.$store.state.formRules,
       roleId: '',
       // 所有角色的角色列表
       rolsesList: [],
@@ -286,35 +281,6 @@ export default {
       formLabelWidth: '80px',
       // 判断是否禁用表单输入
       isDisabledForm: false,
-      // 验证规则
-      dialogFormRules: {
-        username: [
-          { required: true, message: '请输入用户名', trigger: 'blur' },
-          {
-            min: 2,
-            max: 10,
-            message: '长度在 3 到 10 个字符',
-            trigger: 'blur',
-          },
-        ],
-        password: [
-          { required: true, message: '请输入密码', trigger: 'blur' },
-          {
-            min: 6,
-            max: 14,
-            message: '长度在 6 到 14 个字符',
-            trigger: 'blur',
-          },
-        ],
-        mobile: [{ validator: isPhone, trigger: ['blur', 'change'] }],
-        email: [
-          {
-            type: 'email',
-            message: '请输入正确的邮箱地址',
-            trigger: ['blur', 'change'],
-          },
-        ],
-      },
     }
   },
   created() {
