@@ -21,6 +21,18 @@ const rights = {
       rids
     });
   },
+  // 添加角色
+  addUsersRoles(data) {
+    return axios.post(`${base.sq}/roles`, data);
+  },
+  // 修改角色信息
+  putUsersRoles(data) {
+    return axios.put(`${base.sq}/roles/${data.id}`, data);
+  },
+  // 删除角色信息
+  removeUsersRoles(id) {
+    return axios.delete(`${base.sq}/roles/${id}`);
+  },
 }
 
 export default rights

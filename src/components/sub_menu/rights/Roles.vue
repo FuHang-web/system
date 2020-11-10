@@ -1,7 +1,9 @@
 <template>
   <div class="roles">
     <el-card class="box-card">
-      <el-button type="primary" size="small">添加角色</el-button>
+      <el-button type="primary" size="small" @click="addRoles"
+        >添加角色</el-button
+      >
       <el-table :data="rolesList" border>
         <!-- 展开列 -->
         <el-table-column type="expand">
@@ -69,10 +71,18 @@
           align="center"
         >
           <template #default="{ row }">
-            <el-link :underline="false" type="primary" icon="el-icon-edit"
+            <el-link
+              :underline="false"
+              type="primary"
+              icon="el-icon-edit"
+              @click="alterRoles(row)"
               >编辑</el-link
             >
-            <el-link :underline="false" type="danger" icon="el-icon-delete"
+            <el-link
+              :underline="false"
+              type="danger"
+              icon="el-icon-delete"
+              @click="removeRoles(row)"
               >删除</el-link
             >
             <el-link
@@ -86,6 +96,57 @@
         </el-table-column>
       </el-table>
     </el-card>
+    <!-- 添加、编辑的dialog对话框 -->
+    <el-dialog
+      :title="addOrAlter === 0 ? '添加角色' : '修改角色信息'"
+      :visible.sync="addOrAlterDialog"
+      width="25%"
+      class="addOrAlterDialogStyle"
+      @close="closeAddOrAlterDialog"
+    >
+      <el-form
+        ref="addOrAlterFormRef"
+        :model="addOrAlterForm"
+        label-width="80px"
+      >
+        <el-form-item
+          label="角色名称"
+          prop="roleName"
+          :rules="formRules.required"
+        >
+          <el-input
+            size="small"
+            clearable
+            v-model="addOrAlterForm.roleName"
+            placeholder="请输入需要添加的角色名"
+          ></el-input>
+        </el-form-item>
+        <el-form-item label="角色描述">
+          <el-input
+            type="textarea"
+            :autosize="{ minRows: 2 }"
+            size="small"
+            v-model="addOrAlterForm.roleDesc"
+            placeholder="请输入关于此角色的描述（可选）"
+          ></el-input>
+        </el-form-item>
+        <el-form-item class="formButtonStyle">
+          <el-button
+            size="small"
+            type="info"
+            @click="addUsersRoles"
+            v-if="addOrAlter === 0"
+            >确 定</el-button
+          >
+          <el-button size="small" type="info" @click="alterUsersRoles" v-else
+            >修 改</el-button
+          >
+          <el-button size="small" @click="addOrAlterDialog = false"
+            >取 消</el-button
+          >
+        </el-form-item>
+      </el-form>
+    </el-dialog>
     <!-- 展开分配权限的对话框 -->
     <el-dialog
       title="分配权限"
@@ -105,8 +166,10 @@
         :default-checked-keys="defKeys"
       ></el-tree>
       <span slot="footer" class="dialog-footer">
-        <el-button type="info" @click="allotRights">确 定</el-button>
-        <el-button @click="cancelShowDialog">取 消</el-button>
+        <el-button size="small" type="info" @click="allotRights"
+          >确 定</el-button
+        >
+        <el-button size="small" @click="cancelShowDialog">取 消</el-button>
       </span>
     </el-dialog>
   </div>
@@ -117,10 +180,20 @@ export default {
   name: 'roles',
   data() {
     return {
+      formRules: this.$store.state.formRules,
+      // 判断当前打开弹窗是新增还是编辑
+      addOrAlter: 0,
+      //
+      addOrAlterForm: {
+        roleName: '',
+        roleDesc: '',
+      },
       // 角色数据列表
       rolesList: [],
       // 控制dialog弹窗的显示隐藏
       dialogShowRights: false,
+      // 控制添加、编辑的dialog对话框显示隐藏
+      addOrAlterDialog: false,
       // 所有权限的数据列表
       rightsList: [],
       // 树形控件的属性绑定对象
@@ -138,6 +211,85 @@ export default {
     this.getRolesList()
   },
   methods: {
+    //
+    // 关闭添加、编辑角色的dialog弹窗
+    closeAddOrAlterDialog() {
+      this.$refs.addOrAlterFormRef.clearValidate()
+      this.addOrAlterForm = {
+        roleName: '',
+        roleDesc: '',
+      }
+    },
+    // 添加角色-确定提交
+    async addUsersRoles() {
+      console.log(this.addOrAlterForm)
+      this.$refs.addOrAlterFormRef.validate(async (validate) => {
+        if (!validate) {
+          return false
+        }
+        const { data: res } = await this.$http.addUsersRoles(
+          this.addOrAlterForm
+        )
+        if (res.meta.status !== 201) {
+          return this.$message.error('创建角色失败')
+        }
+        this.$message.success('创建角色成功')
+        this.addOrAlterDialog = false
+        this.getRolesList()
+      })
+
+      // console.log(res)
+    },
+    // 修改角色-修改提交
+    async alterUsersRoles() {
+      console.log(this.addOrAlterForm)
+      this.$refs.addOrAlterFormRef.validate(async (validate) => {
+        if (!validate) {
+          return false
+        }
+        const { data: res } = await this.$http.putUsersRoles(
+          this.addOrAlterForm
+        )
+        if (res.meta.status !== 200) {
+          return this.$message.error('修改角色信息失败')
+        }
+        this.$message.success('修改角色信息成功')
+        this.addOrAlterDialog = false
+        this.getRolesList()
+      })
+      // console.log(res)
+    },
+    // 点击添加角色按钮
+    addRoles() {
+      console.log('添加')
+      this.addOrAlterDialog = true
+      this.addOrAlter = 0
+    },
+    // 点击编辑角色按钮
+    alterRoles(row) {
+      this.addOrAlterForm = Object.assign({}, row)
+      this.addOrAlterDialog = true
+      this.addOrAlter = 1
+    },
+    // 删除单个角色
+    async removeRoles(row) {
+      console.log(row.id)
+      const removeResult = await this.$confirm('确定要删除吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }).catch((err) => err)
+      console.log(removeResult)
+      if (removeResult !== 'confirm') {
+        return this.$message.info('取消删除')
+      }
+      const { data: res } = await this.$http.removeUsersRoles(row.id)
+      if (res.meta.status !== 200) {
+        return this.$message.error('删除失败，请稍后再试')
+      }
+      this.getRolesList()
+      this.$message.success('删除成功')
+    },
     // 获取角色数据列表
     async getRolesList() {
       const { data: res } = await this.$http.getRolesList()
@@ -280,6 +432,23 @@ export default {
               }
             }
           }
+        }
+      }
+    }
+  }
+  /deep/.addOrAlterDialogStyle {
+    .el-dialog__header {
+      .el-dialog__title {
+        // color: var(--themeBgColor);
+        font-family: 微软雅黑;
+      }
+    }
+    .el-dialog__body {
+      padding: 20px;
+      .el-form {
+        .formButtonStyle {
+          margin-bottom: 0;
+          text-align: right;
         }
       }
     }
